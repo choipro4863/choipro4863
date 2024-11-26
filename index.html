@@ -5,18 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>보험 & BMI 계산기</title>
     <style>
-        /* 전체 제목 스타일 */
-        .main-title {
-            background-color: lightblue;
-            border: 2px solid #000;
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
         /* 결과값 스타일 */
         .result {
             background-color: yellow;
@@ -27,6 +15,18 @@
             border: 2px solid #000;
             border-radius: 5px;
             margin-top: 10px;
+        }
+
+        /* 제목 스타일 */
+        .main-title {
+            background-color: lightblue;
+            border: 2px solid #000;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -47,17 +47,6 @@
     <p id="insuranceAgeResult" class="result">보험 나이: -</p>
     <p id="renewalDateResult" class="result">다가오는 상령일: -</p>
 
-    <!-- BMI 계산 -->
-    <h2>BMI 계산기</h2>
-    <label for="height">키(cm): </label>
-    <input type="number" id="height" placeholder="예: 170" oninput="updateBMI()"><br><br>
-    <label for="weight">몸무게(kg): </label>
-    <input type="number" id="weight" placeholder="예: 65" oninput="updateBMI()"><br><br>
-
-    <p id="bmiResult" class="result">BMI: -</p>
-    <p id="heightSuggestion" class="result" style="display: none;">현재 몸무게 대비 키가 "-cm 이상"이어야 합니다.</p>
-    <p id="weightSuggestion" class="result" style="display: none;">현재 키 대비 몸무게가 "-kg 이하"이어야 합니다.</p>
-
     <script>
         // 오늘 날짜 표시
         document.getElementById("currentDate").innerText = new Date().toISOString().split("T")[0];
@@ -76,79 +65,31 @@
 
             // 보험 나이 계산
             let insuranceAge = currentDate.getFullYear() - birthDate.getFullYear();
-            const currentMonthDay = `${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
-            const birthMonthDay = `${birthDate.getMonth() + 1}-${birthDate.getDate()}`;
-
-            if (currentMonthDay < birthMonthDay) {
+            if (
+                currentDate.getMonth() < birthDate.getMonth() ||
+                (currentDate.getMonth() === birthDate.getMonth() && currentDate.getDate() < birthDate.getDate())
+            ) {
                 insuranceAge += 1;
             }
             document.getElementById("insuranceAgeResult").innerText = `보험 나이: ${insuranceAge}세`;
 
-            // 상령일 계산 (6개월 후)
-            const birthMonth = birthDate.getMonth();
-            const birthDay = birthDate.getDate();
+            // 상령일 계산 (6개월 뒤의 출생일과 같은 날짜)
             let renewalYear = currentDate.getFullYear();
-            let renewalMonth = (birthMonth + 6) % 12;
-
-            if (birthMonth >= 6) {
-                renewalYear += 1;
+            let renewalMonth = (birthDate.getMonth() + 6) % 12; // 6개월 후
+            if (birthDate.getMonth() + 6 >= 12) {
+                renewalYear += 1; // 연도가 넘어가는 경우
             }
 
-            // 상령일 날짜 생성
-            let renewalDate = new Date(renewalYear, renewalMonth, birthDay);
+            let renewalDate = new Date(renewalYear, renewalMonth, birthDate.getDate());
 
-            // 상령일이 이미 지나간 경우 다음 해로 조정
+            // 오늘 날짜보다 상령일이 과거라면 1년 후로 조정
             if (currentDate >= renewalDate) {
-                renewalDate = new Date(renewalYear + 1, renewalMonth, birthDay);
+                renewalDate = new Date(renewalYear + 1, renewalMonth, birthDate.getDate());
             }
 
+            // 결과 출력
             const formattedRenewalDate = renewalDate.toISOString().split("T")[0];
             document.getElementById("renewalDateResult").innerText = `다가오는 상령일: ${formattedRenewalDate}`;
-        }
-
-        // BMI 업데이트 및 키/몸무게 추천
-        function updateBMI() {
-            const height = document.getElementById("height").value / 100;
-            const weight = document.getElementById("weight").value;
-
-            const heightSuggestion = document.getElementById("heightSuggestion");
-            const weightSuggestion = document.getElementById("weightSuggestion");
-
-            if (!height || !weight) {
-                document.getElementById("bmiResult").innerText = "BMI: -";
-                heightSuggestion.style.display = "none";
-                weightSuggestion.style.display = "none";
-                return;
-            }
-
-            const bmi = (weight / (height * height)).toFixed(2);
-            let status = "";
-
-            // BMI 상태 구분
-            if (bmi < 18.5) status = "저체중";
-            else if (bmi < 24.9) status = "정상";
-            else if (bmi < 29.9) status = "과체중";
-            else status = "비만";
-
-            document.getElementById("bmiResult").innerText = `BMI: ${bmi} (${status})`;
-
-            // 목표 BMI 28 미만일 경우 추천 문구 숨김
-            const targetBMI = 28;
-            if (bmi < targetBMI) {
-                heightSuggestion.style.display = "none";
-                weightSuggestion.style.display = "none";
-                return;
-            }
-
-            // 키 조건 계산
-            const requiredHeight = Math.sqrt(weight / targetBMI).toFixed(2) * 100; // cm로 변환
-            heightSuggestion.innerText = `현재 몸무게 대비 키가 "${requiredHeight.toFixed(1)}cm 이상"이어야 합니다.`;
-            heightSuggestion.style.display = "block";
-
-            // 몸무게 조건 계산
-            const requiredWeight = (targetBMI * (height * height)).toFixed(1); // kg 계산
-            weightSuggestion.innerText = `현재 키 대비 몸무게가 "${requiredWeight}kg 이하"이어야 합니다.`;
-            weightSuggestion.style.display = "block";
         }
     </script>
 </body>
