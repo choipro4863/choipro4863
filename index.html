@@ -42,7 +42,8 @@
     <input type="number" id="weight" placeholder="예: 65" oninput="updateBMI()"><br><br>
 
     <p id="bmiResult" class="result">BMI: -</p>
-    <p id="heightSuggestion" class="result">현재 몸무게 대비 키가 "-cm 이상"이어야 합니다.</p>
+    <p id="heightSuggestion" class="result" style="display: none;">현재 몸무게 대비 키가 "-cm 이상"이어야 합니다.</p>
+    <p id="weightSuggestion" class="result" style="display: none;">현재 키 대비 몸무게가 "-kg 이하"이어야 합니다.</p>
 
     <script>
         // 오늘 날짜 표시
@@ -96,14 +97,18 @@
             document.getElementById("renewalDateResult").innerText = `다가오는 상령일: ${formattedRenewalDate}`;
         }
 
-        // BMI 업데이트 및 키 추천
+        // BMI 업데이트 및 키/몸무게 추천
         function updateBMI() {
             const height = document.getElementById("height").value / 100;
             const weight = document.getElementById("weight").value;
 
+            const heightSuggestion = document.getElementById("heightSuggestion");
+            const weightSuggestion = document.getElementById("weightSuggestion");
+
             if (!height || !weight) {
                 document.getElementById("bmiResult").innerText = "BMI: -";
-                document.getElementById("heightSuggestion").innerText = "현재 몸무게 대비 키가 \"-cm 이상\"이어야 합니다.";
+                heightSuggestion.style.display = "none";
+                weightSuggestion.style.display = "none";
                 return;
             }
 
@@ -118,14 +123,27 @@
 
             document.getElementById("bmiResult").innerText = `BMI: ${bmi} (${status})`;
 
-            // 목표 BMI 28 미만을 위해 필요한 키 계산
+            // 목표 BMI 28 미만일 경우 추천 문구 숨김
             const targetBMI = 28;
+            if (bmi < targetBMI) {
+                heightSuggestion.style.display = "none";
+                weightSuggestion.style.display = "none";
+                return;
+            }
+
+            // 키 조건 계산
             const requiredHeight = Math.sqrt(weight / targetBMI).toFixed(2) * 100; // cm로 변환
-            document.getElementById("heightSuggestion").innerText = `현재 몸무게 대비 키가 "${requiredHeight.toFixed(1)}cm 이상"이어야 합니다.`;
+            heightSuggestion.innerText = `현재 몸무게 대비 키가 "${requiredHeight.toFixed(1)}cm 이상"이어야 합니다.`;
+            heightSuggestion.style.display = "block";
+
+            // 몸무게 조건 계산
+            const requiredWeight = (targetBMI * (height * height)).toFixed(1); // kg 계산
+            weightSuggestion.innerText = `현재 키 대비 몸무게가 "${requiredWeight}kg 이하"이어야 합니다.`;
+            weightSuggestion.style.display = "block";
         }
     </script>
 </body>
 <footer>
-  <p>오류 및 건의 : 최기영01074494863</p>
+  <p>만든사람 : 최기영01074494863</p>
 </footer>
 </html>
