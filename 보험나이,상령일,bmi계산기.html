@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>보험 & BMI 계산기</title>
+</head>
+<body>
+    <h1>보험 & BMI 계산기</h1>
+
+    <!-- 오늘 날짜 표시 -->
+    <h2>오늘 날짜</h2>
+    <p>오늘 날짜: <span id="currentDate"></span></p>
+
+    <!-- 출생일 입력 -->
+    <h2>출생일 입력</h2>
+    <label for="birthDate">출생일: </label>
+    <input type="date" id="birthDate" oninput="updateInsuranceInfo()"><br><br>
+
+    <!-- 보험 나이 및 상령일 결과 -->
+    <p id="insuranceAgeResult">보험 나이: -</p>
+    <p id="renewalDateResult">다가오는 상령일: -</p>
+
+    <!-- BMI 계산 -->
+    <h2>BMI 계산기</h2>
+    <label for="height">키(cm): </label>
+    <input type="number" id="height" placeholder="예: 170" oninput="updateBMI()"><br><br>
+    <label for="weight">몸무게(kg): </label>
+    <input type="number" id="weight" placeholder="예: 65" oninput="updateBMI()"><br><br>
+    <label for="age">나이: </label>
+    <input type="number" id="age" placeholder="예: 30" oninput="updateBMI()"><br><br>
+    <label for="gender">성별: </label>
+    <select id="gender" onchange="updateBMI()">
+        <option value="male">남성</option>
+        <option value="female">여성</option>
+    </select><br><br>
+
+    <p id="bmiResult">BMI: -</p>
+
+    <script>
+        // 오늘 날짜 표시
+        document.getElementById("currentDate").innerText = new Date().toISOString().split("T")[0];
+
+        // 보험 나이와 상령일 계산 업데이트
+        function updateInsuranceInfo() {
+            const birthDate = new Date(document.getElementById("birthDate").value);
+            const currentDate = new Date();
+
+            if (isNaN(birthDate)) {
+                document.getElementById("insuranceAgeResult").innerText = "보험 나이: -";
+                document.getElementById("renewalDateResult").innerText = "다가오는 상령일: -";
+                return;
+            }
+
+            // 보험 나이 계산
+            let insuranceAge = currentDate.getFullYear() - birthDate.getFullYear();
+            if (currentDate.getMonth() < birthDate.getMonth() || 
+                (currentDate.getMonth() === birthDate.getMonth() && currentDate.getDate() < birthDate.getDate())) {
+                insuranceAge += 1;
+            }
+            document.getElementById("insuranceAgeResult").innerText = `보험 나이: ${insuranceAge}세`;
+
+            // 상령일 계산
+            const birthMonth = birthDate.getMonth();
+            const birthDay = birthDate.getDate();
+            const thisYear = currentDate.getFullYear();
+            let thisYearRenewalDate = new Date(thisYear, birthMonth - 6, birthDay);
+
+            if (birthMonth < 6) {
+                thisYearRenewalDate = new Date(thisYear, 12 + (birthMonth - 6), birthDay);
+            }
+
+            let nextRenewalDate;
+            if (currentDate >= thisYearRenewalDate) {
+                nextRenewalDate = new Date(thisYear + 1, birthMonth - 6, birthDay);
+                if (birthMonth < 6) {
+                    nextRenewalDate = new Date(thisYear + 1, 12 + (birthMonth - 6), birthDay);
+                }
+            } else {
+                nextRenewalDate = thisYearRenewalDate;
+            }
+
+            const formattedDate = nextRenewalDate.toISOString().split("T")[0];
+            document.getElementById("renewalDateResult").innerText = `다가오는 상령일: ${formattedDate}`;
+        }
+
+        // BMI 업데이트
+        function updateBMI() {
+            const height = document.getElementById("height").value / 100;
+            const weight = document.getElementById("weight").value;
+            const age = document.getElementById("age").value;
+            const gender = document.getElementById("gender").value;
+
+            if (!height || !weight || !age || !gender) {
+                document.getElementById("bmiResult").innerText = "BMI: -";
+                return;
+            }
+
+            const bmi = (weight / (height * height)).toFixed(2);
+            let status = "";
+
+            // BMI 상태 구분
+            if (bmi < 18.5) status = "저체중";
+            else if (bmi < 24.9) status = "정상";
+            else if (bmi < 29.9) status = "과체중";
+            else status = "비만";
+
+            // 성별 및 나이 추가 설명
+            const additionalInfo = gender === "male"
+                ? "남성은 근육량이 많아 BMI 기준이 조금 다를 수 있습니다."
+                : "여성은 체지방률이 높아 BMI 기준이 다를 수 있습니다.";
+            document.getElementById("bmiResult").innerText = `BMI: ${bmi} (${status}). ${additionalInfo}`;
+        }
+    </script>
+</body>
+</html>
