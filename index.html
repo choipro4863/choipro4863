@@ -28,31 +28,40 @@
             border-radius: 8px;
             margin-bottom: 20px;
         }
+
+        /* 폼 스타일 */
+        input, button {
+            font-size: 16px;
+            padding: 8px;
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
     <!-- 제목 -->
-    <h1 class="main-title">보험나이 & BMI계산기(약관본부)</h1>
-
-    <!-- 오늘 날짜 표시 -->
-    <h2>오늘 날짜</h2>
-    <p>오늘 날짜: <span id="currentDate"></span></p>
+    <h1 class="main-title">보험나이 & BMI 계산기(약관본부)</h1>
 
     <!-- 출생일 입력 -->
     <h2>출생일 입력</h2>
     <label for="birthDate">출생일: </label>
-    <input type="date" id="birthDate" oninput="updateInsuranceInfo()"><br><br>
+    <input type="date" id="birthDate" oninput="calculateInsuranceAgeAndRenewalDate()"><br><br>
 
     <!-- 보험 나이 및 상령일 결과 -->
     <p id="insuranceAgeResult" class="result">보험 나이: -</p>
     <p id="renewalDateResult" class="result">다가오는 상령일: -</p>
 
-    <script>
-        // 오늘 날짜 표시
-        document.getElementById("currentDate").innerText = new Date().toISOString().split("T")[0];
+    <!-- BMI 계산 -->
+    <h2>BMI 계산</h2>
+    <label for="height">키 (cm): </label>
+    <input type="number" id="height" placeholder="키 입력"><br>
+    <label for="weight">체중 (kg): </label>
+    <input type="number" id="weight" placeholder="체중 입력"><br>
+    <button onclick="calculateBMI()">BMI 계산하기</button>
+    <p id="bmiResult" class="result">BMI: -</p>
 
-        // 보험 나이와 상령일 계산 업데이트
-        function updateInsuranceInfo() {
+    <script>
+        // 보험 나이와 상령일 계산
+        function calculateInsuranceAgeAndRenewalDate() {
             const birthDateInput = document.getElementById("birthDate").value;
             if (!birthDateInput) {
                 document.getElementById("insuranceAgeResult").innerText = "보험 나이: -";
@@ -73,27 +82,39 @@
             }
             document.getElementById("insuranceAgeResult").innerText = `보험 나이: ${insuranceAge}세`;
 
-            // 상령일 계산 (6개월 뒤의 출생일과 같은 날짜)
-            let renewalYear = currentDate.getFullYear();
-            let renewalMonth = (birthDate.getMonth() + 6) % 12; // 6개월 후
-            if (birthDate.getMonth() + 6 >= 12) {
-                renewalYear += 1; // 연도가 넘어가는 경우
-            }
-
-            let renewalDate = new Date(renewalYear, renewalMonth, birthDate.getDate());
-
-            // 오늘 날짜보다 상령일이 과거라면 1년 후로 조정
-            if (currentDate >= renewalDate) {
-                renewalDate = new Date(renewalYear + 1, renewalMonth, birthDate.getDate());
-            }
+            // 상령일 계산 (6개월 후)
+            const renewalDate = new Date(birthDate);
+            renewalDate.setMonth(birthDate.getMonth() + 6);
 
             // 결과 출력
             const formattedRenewalDate = renewalDate.toISOString().split("T")[0];
             document.getElementById("renewalDateResult").innerText = `다가오는 상령일: ${formattedRenewalDate}`;
         }
+
+        // BMI 계산
+        function calculateBMI() {
+            const height = parseFloat(document.getElementById("height").value);
+            const weight = parseFloat(document.getElementById("weight").value);
+
+            if (!height || !weight) {
+                document.getElementById("bmiResult").innerText = "BMI: 입력값을 확인하세요.";
+                return;
+            }
+
+            const heightInMeters = height / 100;
+            const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(2);
+
+            let status = "";
+            if (bmi < 18.5) status = "저체중";
+            else if (bmi < 25) status = "정상";
+            else if (bmi < 30) status = "과체중";
+            else status = "비만";
+
+            document.getElementById("bmiResult").innerText = `BMI: ${bmi} (${status})`;
+        }
     </script>
 </body>
 <footer>
-  <p>만든사람 : 최기영01074494863</p>
+  <p>만든사람 : 최기영 010-7449-4863</p>
 </footer>
 </html>
