@@ -1,4 +1,4 @@
-## Hi there 👋
+## Hi there 👋 만든사람 : 최기영
 
 <!--
 **choipro4863/choipro4863** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
