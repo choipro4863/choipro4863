@@ -62,36 +62,17 @@
             const birthDate = new Date(birthDateInput);
             const currentDate = new Date();
 
-            // 생일 기준 6개월 전 날짜 계산
+            // 보험 나이 계산 (출생일 기준 6개월 전)
             const sixMonthsBeforeBirthday = new Date(birthDate);
             sixMonthsBeforeBirthday.setMonth(birthDate.getMonth() - 6);
-
-            // 날짜 보정 (월 초과 오류 방지)
-            if (sixMonthsBeforeBirthday.getMonth() !== (birthDate.getMonth() - 6 + 12) % 12) {
-                sixMonthsBeforeBirthday.setDate(0);
-            }
-
-            // 현재 연도에 맞는 6개월 전 기준일 계산
-            const sixMonthsBeforeThisYear = new Date(currentDate.getFullYear(), sixMonthsBeforeBirthday.getMonth(), birthDate.getDate());
-            if (sixMonthsBeforeThisYear.getDate() !== birthDate.getDate()) {
-                sixMonthsBeforeThisYear.setDate(0);
-            }
-
-            // 보험 나이 계산
-            let insuranceAge = currentDate.getFullYear() - birthDate.getFullYear();
-            if (currentDate >= sixMonthsBeforeThisYear) {
-                insuranceAge += 1;
-            }
+            const insuranceAge = currentDate.getFullYear() - sixMonthsBeforeBirthday.getFullYear()
+                - (currentDate < new Date(sixMonthsBeforeBirthday.setFullYear(currentDate.getFullYear())) ? 1 : 0);
 
             document.getElementById("insuranceAgeResult").innerText = `보험 나이: ${insuranceAge}세`;
 
-            // 상령일 계산 (생일에서 6개월 더하기)
+            // 상령일 계산 (출생일 + 6개월)
             const sixMonthsAfterBirthday = new Date(birthDate);
             sixMonthsAfterBirthday.setMonth(birthDate.getMonth() + 6);
-            if (sixMonthsAfterBirthday.getMonth() !== (birthDate.getMonth() + 6) % 12) {
-                sixMonthsAfterBirthday.setDate(0);
-            }
-
             const formattedRenewalDate = `${sixMonthsAfterBirthday.getMonth() + 1}월 ${sixMonthsAfterBirthday.getDate()}일`;
             document.getElementById("renewalDateResult").innerText = `상령일: 매년 ${formattedRenewalDate}`;
         }
