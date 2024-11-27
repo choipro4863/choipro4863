@@ -65,7 +65,6 @@
             // 생일 기준 6개월 전 날짜 계산
             const sixMonthsBeforeBirthday = new Date(birthDate);
             sixMonthsBeforeBirthday.setMonth(birthDate.getMonth() - 6);
-
             if (sixMonthsBeforeBirthday.getMonth() !== (birthDate.getMonth() - 6 + 12) % 12) {
                 sixMonthsBeforeBirthday.setDate(0); // 유효하지 않은 날짜 보정
             }
@@ -73,7 +72,7 @@
             // 보험 나이 계산
             let insuranceAge = currentDate.getFullYear() - birthDate.getFullYear();
             if (
-                currentDate >= new Date(currentDate.getFullYear(), sixMonthsBeforeBirthday.getMonth(), birthDate.getDate())
+                currentDate >= new Date(currentDate.getFullYear(), sixMonthsBeforeBirthday.getMonth(), sixMonthsBeforeBirthday.getDate())
             ) {
                 insuranceAge += 1;
             }
