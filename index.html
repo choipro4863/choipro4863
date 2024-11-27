@@ -74,19 +74,22 @@
             const birthDate = new Date(birthDateInput);
             const currentDate = new Date();
 
-            // 생일 기준 나이 계산
-            let insuranceAge = currentDate.getFullYear() - birthDate.getFullYear();
-
-            // 현재 연도의 생일 날짜 계산
+            // 보험 나이 계산 로직
             const thisYearBirthday = new Date(currentDate.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+            const nextYearBirthday = new Date(currentDate.getFullYear() + 1, birthDate.getMonth(), birthDate.getDate());
+            const lastYearBirthday = new Date(currentDate.getFullYear() - 1, birthDate.getMonth(), birthDate.getDate());
 
-            // 생일이 지나지 않았으면 보험 나이 +1
-            if (currentDate < thisYearBirthday) {
-                insuranceAge -= 1;
+            let insuranceAge;
+
+            if (currentDate >= thisYearBirthday) {
+                // 생일이 지났다면 현재 연도를 기준으로 보험 나이 계산
+                insuranceAge = currentDate.getFullYear() - birthDate.getFullYear() + 1;
+            } else {
+                // 생일이 지나지 않았다면 다음 생일 기준으로 보험 나이 계산
+                insuranceAge = currentDate.getFullYear() - birthDate.getFullYear();
             }
 
-            // 보험 나이: 가장 가까운 생일 기준으로 나이를 계산
-            document.getElementById("insuranceAgeResult").innerText = `보험 나이: ${insuranceAge + 1}세`;
+            document.getElementById("insuranceAgeResult").innerText = `보험 나이: ${insuranceAge}세`;
 
             // 상령일 계산
             const sixMonthsAgo = new Date(birthDate);
