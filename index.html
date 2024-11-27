@@ -37,25 +37,15 @@
 
     <h2>출생일 입력</h2>
     <label for="birthDate">출생일: </label>
-    <input type="date" id="birthDate" oninput="calculateInsuranceAgeAndRenewalDate()"><br><br>
+    <input type="date" id="birthDate" oninput="calculateInsuranceAge()"><br><br>
 
     <p id="insuranceAgeResult" class="result">보험 나이: -</p>
-    <p id="renewalDateResult" class="result">상령일: -</p>
-
-    <h2>BMI 계산</h2>
-    <label for="height">키 (cm): </label>
-    <input type="number" id="height" placeholder="키 입력" oninput="calculateBMI()"><br>
-    <label for="weight">체중 (kg): </label>
-    <input type="number" id="weight" placeholder="체중 입력" oninput="calculateBMI()"><br>
-    <p id="bmiResult" class="result">BMI: -</p>
-    <p id="bmiSuggestion" style="display: none; font-weight: bold; color: blue;"></p>
 
     <script>
-        function calculateInsuranceAgeAndRenewalDate() {
+        function calculateInsuranceAge() {
             const birthDateInput = document.getElementById("birthDate").value;
             if (!birthDateInput) {
                 document.getElementById("insuranceAgeResult").innerText = "보험 나이: -";
-                document.getElementById("renewalDateResult").innerText = "상령일: -";
                 return;
             }
 
@@ -65,65 +55,24 @@
             // 생일 기준 6개월 전 날짜 계산
             const sixMonthsBeforeBirthday = new Date(birthDate);
             sixMonthsBeforeBirthday.setMonth(birthDate.getMonth() - 6);
+
+            // 날짜가 유효하지 않을 경우 보정
             if (sixMonthsBeforeBirthday.getMonth() !== (birthDate.getMonth() - 6 + 12) % 12) {
-                sixMonthsBeforeBirthday.setDate(0); // 유효하지 않은 날짜 보정
+                sixMonthsBeforeBirthday.setDate(0);
             }
+
+            // 현재 연도에 해당하는 6개월 전 날짜 계산
+            const sixMonthsBeforeThisYear = new Date(currentDate.getFullYear(), sixMonthsBeforeBirthday.getMonth(), birthDate.getDate());
 
             // 보험 나이 계산
             let insuranceAge = currentDate.getFullYear() - birthDate.getFullYear();
-            if (
-                currentDate >= new Date(currentDate.getFullYear(), sixMonthsBeforeBirthday.getMonth(), sixMonthsBeforeBirthday.getDate())
-            ) {
+
+            // 오늘 날짜가 6개월 전 기준일을 지났다면 보험 나이 증가
+            if (currentDate >= sixMonthsBeforeThisYear) {
                 insuranceAge += 1;
             }
+
             document.getElementById("insuranceAgeResult").innerText = `보험 나이: ${insuranceAge}세`;
-
-            // 상령일 계산 (생일에서 6개월 더하기)
-            const sixMonthsAfterBirthday = new Date(birthDate);
-            sixMonthsAfterBirthday.setMonth(birthDate.getMonth() + 6);
-            if (sixMonthsAfterBirthday.getMonth() !== (birthDate.getMonth() + 6) % 12) {
-                sixMonthsAfterBirthday.setDate(0); // 유효하지 않은 날짜 보정
-            }
-
-            const formattedRenewalDate = `${sixMonthsAfterBirthday.getMonth() + 1}월 ${sixMonthsAfterBirthday.getDate()}일`;
-            document.getElementById("renewalDateResult").innerText = `상령일: 매년 ${formattedRenewalDate}`;
-        }
-
-        function calculateBMI() {
-            const height = parseFloat(document.getElementById("height").value);
-            const weight = parseFloat(document.getElementById("weight").value);
-
-            if (!height || !weight) {
-                document.getElementById("bmiResult").innerText = "BMI: 입력값을 확인하세요.";
-                document.getElementById("bmiSuggestion").style.display = "none";
-                return;
-            }
-
-            const heightInMeters = height / 100;
-            const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(2);
-
-            let status = "";
-            if (bmi < 18.5) status = "저체중";
-            else if (bmi < 25) status = "정상";
-            else if (bmi < 30) status = "과체중";
-            else status = "비만";
-
-            document.getElementById("bmiResult").innerText = `BMI: ${bmi} (${status})`;
-
-            if (bmi >= 28) {
-                const minHeightForBMI28 = Math.sqrt(weight / 28) * 100;
-                const maxWeightForBMI28 = 28 * heightInMeters * heightInMeters;
-
-                const suggestionMessage = `
-                    보험 가입을 위해:<br>
-                    현재 체중 기준: 키는 ${minHeightForBMI28.toFixed(1)}cm 이상이어야 합니다.<br>
-                    현재 키 기준: 몸무게는 ${maxWeightForBMI28.toFixed(1)}kg 이하여야 합니다.
-                `;
-                document.getElementById("bmiSuggestion").innerHTML = suggestionMessage;
-                document.getElementById("bmiSuggestion").style.display = "block";
-            } else {
-                document.getElementById("bmiSuggestion").style.display = "none";
-            }
         }
     </script>
 </body>
