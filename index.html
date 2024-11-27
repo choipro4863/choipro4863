@@ -46,8 +46,9 @@
     <label for="birthDate">출생일: </label>
     <input type="date" id="birthDate" oninput="calculateInsuranceAgeAndRenewalDate()"><br><br>
 
-    <!-- 보험 나이 결과 -->
+    <!-- 보험 나이 및 상령일 결과 -->
     <p id="insuranceAgeResult" class="result">보험 나이: -</p>
+    <p id="nextRenewalDateResult" class="result">다음 상령일: -</p>
 
     <!-- BMI 계산 -->
     <h2>BMI 계산(28미만!!)</h2>
@@ -61,18 +62,19 @@
     </p>
 
     <script>
-        // 보험 나이 계산
+        // 보험 나이와 다음 상령일 계산
         function calculateInsuranceAgeAndRenewalDate() {
             const birthDateInput = document.getElementById("birthDate").value;
             if (!birthDateInput) {
                 document.getElementById("insuranceAgeResult").innerText = "보험 나이: -";
+                document.getElementById("nextRenewalDateResult").innerText = "다음 상령일: -";
                 return;
             }
 
             const birthDate = new Date(birthDateInput);
             const currentDate = new Date();
 
-            // 생일 6개월 전 날짜 계산
+            // 6개월 전 생일 계산
             const sixMonthsBeforeBirthday = new Date(birthDate);
             sixMonthsBeforeBirthday.setMonth(sixMonthsBeforeBirthday.getMonth() - 6);
 
@@ -88,6 +90,19 @@
             }
 
             document.getElementById("insuranceAgeResult").innerText = `보험 나이: ${insuranceAge}세`;
+
+            // 다음 상령일 계산
+            const sixMonthsAfterBirthday = new Date(birthDate);
+            sixMonthsAfterBirthday.setMonth(sixMonthsAfterBirthday.getMonth() + 6);
+            let nextRenewalDate = new Date(currentDate.getFullYear(), sixMonthsAfterBirthday.getMonth(), sixMonthsAfterBirthday.getDate());
+
+            // 오늘 날짜가 상령일을 지난 경우, 다음 해로 계산
+            if (currentDate > nextRenewalDate) {
+                nextRenewalDate.setFullYear(currentDate.getFullYear() + 1);
+            }
+
+            const formattedRenewalDate = nextRenewalDate.toISOString().split("T")[0];
+            document.getElementById("nextRenewalDateResult").innerText = `다음 상령일: ${formattedRenewalDate}`;
         }
 
         // BMI 계산
