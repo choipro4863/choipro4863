@@ -72,17 +72,20 @@
             const birthDate = new Date(birthDateInput);
             const currentDate = new Date();
 
-            // 6개월 전 생일 계산
+            // 생일 6개월 전 날짜 계산
             const sixMonthsBeforeBirthday = new Date(birthDate);
             sixMonthsBeforeBirthday.setMonth(sixMonthsBeforeBirthday.getMonth() - 6);
 
-            // 현재 나이 계산
-            const age = currentDate.getFullYear() - birthDate.getFullYear();
-            const hasPassedSixMonthsBeforeBirthday =
-                currentDate >= new Date(currentDate.getFullYear(), sixMonthsBeforeBirthday.getMonth(), sixMonthsBeforeBirthday.getDate());
+            // 생년월일에 맞춘 6개월 전 날짜 계산
+            const sixMonthsThisYear = new Date(currentDate.getFullYear(), sixMonthsBeforeBirthday.getMonth(), sixMonthsBeforeBirthday.getDate());
 
-            // 보험 나이: 만 나이에 6개월 전 생일이 지났으면 +1
-            const insuranceAge = hasPassedSixMonthsBeforeBirthday ? age + 1 : age;
+            // 보험 나이 계산
+            let insuranceAge = currentDate.getFullYear() - birthDate.getFullYear();
+
+            // 6개월 전 기준 현재 날짜 비교
+            if (currentDate >= sixMonthsThisYear) {
+                insuranceAge += 1; // 이미 보험 나이가 올라간 경우
+            }
 
             document.getElementById("insuranceAgeResult").innerText = `보험 나이: ${insuranceAge}세`;
         }
