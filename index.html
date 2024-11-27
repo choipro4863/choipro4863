@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>보험 & BMI 계산기(약관본부)</title>
     <style>
-        /* 결과값 스타일 */
         .result {
             background-color: yellow;
             font-size: 24px;
@@ -16,8 +15,6 @@
             border-radius: 5px;
             margin-top: 10px;
         }
-
-        /* 제목 스타일 */
         .main-title {
             background-color: lightblue;
             border: 2px solid #000;
@@ -28,8 +25,6 @@
             border-radius: 8px;
             margin-bottom: 20px;
         }
-
-        /* 폼 스타일 */
         input {
             font-size: 16px;
             padding: 8px;
@@ -38,31 +33,24 @@
     </style>
 </head>
 <body>
-    <!-- 제목 -->
-    <h1 class="main-title">보험나이 & BMI계산기(약관본부)</h1>
+    <h1 class="main-title">보험나이 & BMI 계산기(약관본부)</h1>
 
-    <!-- 출생일 입력 -->
     <h2>출생일 입력</h2>
     <label for="birthDate">출생일: </label>
     <input type="date" id="birthDate" oninput="calculateInsuranceAgeAndRenewalDate()"><br><br>
 
-    <!-- 보험 나이 및 상령일 결과 -->
     <p id="insuranceAgeResult" class="result">보험 나이: -</p>
     <p id="nextRenewalDateResult" class="result">다음 상령일: -</p>
 
-    <!-- BMI 계산 -->
     <h2>BMI 계산(28미만!!)</h2>
     <label for="height">키 (cm): </label>
     <input type="number" id="height" placeholder="키 입력" oninput="calculateBMI()"><br>
     <label for="weight">체중 (kg): </label>
     <input type="number" id="weight" placeholder="체중 입력" oninput="calculateBMI()"><br>
     <p id="bmiResult" class="result">BMI: -</p>
-    <p id="bmiSuggestion" style="display: none; font-weight: bold; color: blue;">
-        <!-- 추가 메시지 표시 -->
-    </p>
+    <p id="bmiSuggestion" style="display: none; font-weight: bold; color: blue;"></p>
 
     <script>
-        // 보험 나이와 다음 상령일 계산
         function calculateInsuranceAgeAndRenewalDate() {
             const birthDateInput = document.getElementById("birthDate").value;
             if (!birthDateInput) {
@@ -75,32 +63,35 @@
             const currentDate = new Date();
 
             // 생일 기준 6개월 전 날짜 계산
-            let sixMonthsBeforeBirthday = new Date(birthDate);
-            sixMonthsBeforeBirthday.setMonth(birthDate.getMonth() - 6);
+            const sixMonthsBefore = new Date(birthDate);
+            sixMonthsBefore.setMonth(birthDate.getMonth() - 6);
 
-            // 만약 날짜가 잘못 계산되면 조정
-            if (sixMonthsBeforeBirthday.getMonth() !== (birthDate.getMonth() + 6) % 12) {
-                sixMonthsBeforeBirthday = new Date(sixMonthsBeforeBirthday.getFullYear(), sixMonthsBeforeBirthday.getMonth(), 0);
+            if (sixMonthsBefore.getMonth() !== (birthDate.getMonth() - 6 + 12) % 12) {
+                sixMonthsBefore.setDate(0); // 유효하지 않은 날짜 보정
             }
 
             // 보험 나이 계산
             let insuranceAge = currentDate.getFullYear() - birthDate.getFullYear();
-            if (currentDate >= sixMonthsBeforeBirthday) {
+
+            // 오늘이 생일 기준 6개월 전을 지나면 보험 나이 +1
+            if (
+                currentDate.getMonth() > sixMonthsBefore.getMonth() ||
+                (currentDate.getMonth() === sixMonthsBefore.getMonth() && currentDate.getDate() >= sixMonthsBefore.getDate())
+            ) {
                 insuranceAge += 1;
             }
 
             document.getElementById("insuranceAgeResult").innerText = `보험 나이: ${insuranceAge}세`;
 
             // 다음 상령일 계산
-            let sixMonthsAfterBirthday = new Date(birthDate);
-            sixMonthsAfterBirthday.setMonth(birthDate.getMonth() + 6);
+            const sixMonthsAfter = new Date(birthDate);
+            sixMonthsAfter.setMonth(birthDate.getMonth() + 6);
 
-            // 날짜 조정
-            if (sixMonthsAfterBirthday.getMonth() !== (birthDate.getMonth() + 6) % 12) {
-                sixMonthsAfterBirthday = new Date(sixMonthsAfterBirthday.getFullYear(), sixMonthsAfterBirthday.getMonth(), 0);
+            if (sixMonthsAfter.getMonth() !== (birthDate.getMonth() + 6) % 12) {
+                sixMonthsAfter.setDate(0); // 유효하지 않은 날짜 보정
             }
 
-            let nextRenewalDate = new Date(currentDate.getFullYear(), sixMonthsAfterBirthday.getMonth(), sixMonthsAfterBirthday.getDate());
+            let nextRenewalDate = new Date(currentDate.getFullYear(), sixMonthsAfter.getMonth(), birthDate.getDate());
             if (currentDate > nextRenewalDate) {
                 nextRenewalDate.setFullYear(currentDate.getFullYear() + 1);
             }
@@ -109,7 +100,6 @@
             document.getElementById("nextRenewalDateResult").innerText = `다음 상령일: ${formattedRenewalDate}`;
         }
 
-        // BMI 계산
         function calculateBMI() {
             const height = parseFloat(document.getElementById("height").value);
             const weight = parseFloat(document.getElementById("weight").value);
@@ -131,7 +121,6 @@
 
             document.getElementById("bmiResult").innerText = `BMI: ${bmi} (${status})`;
 
-            // BMI가 28 이상일 때만 안내 메시지 표시
             if (bmi >= 28) {
                 const minHeightForBMI28 = Math.sqrt(weight / 28) * 100;
                 const maxWeightForBMI28 = 28 * heightInMeters * heightInMeters;
